@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - GasTank
+  - Target
+  - Concrete
+  - Metal
+  - ExplosiveBarrel
+  - dungeon
+  - Timer
+  - Zombie
+  - Health
+  - PickupUI
+  - Wall
+  - SafeWall
+  - Light
+  - Portal
+  - Door
+  - Skeleton
+  - Spike
+  - Trapdoor
+  - dungeonTimer
+  - dungeonCleared
+  - totalTime
+  - playerKills
+  - playerDeaths
+  - Archer
+  - icon
+  - Health_bar
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Ignore Light
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Ignore Light
+    uniqueID: 775295925
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
