@@ -28,9 +28,9 @@ public class GraphTest : MonoBehaviour
     public GameObject textPrefab;
     private Transform textContainer;
 
-    int minHeartRate;
-    int maxHeartRate;
-    int averageHeartRate;
+    public int minHeartRate;
+    public int maxHeartRate;
+    public int averageHeartRate;
     #endregion
 
     private static GraphTest instance;
@@ -101,6 +101,11 @@ public class GraphTest : MonoBehaviour
 
             maxHeartRate = heartRates.Max();
             averageHeartRate = (int)heartRates.Average();
+
+            GameManager manager = FindObjectOfType<GameManager>();
+            manager.HeartRateAverage = averageHeartRate;
+            manager.HeartRateMin = minHeartRate;
+            manager.HeartRateMax = maxHeartRate;
 
             Debug.Log("Minimum Heart Rate: " + minHeartRate);
             Debug.Log("Maximum Heart Rate: " + maxHeartRate);

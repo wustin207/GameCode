@@ -14,7 +14,12 @@ public class GameManager : MonoBehaviour
     private float startTime;
     public float currentTime;
     public Player playerScript;
+    public int HeartRateAverage;
+    public int HeartRateMin;
+    public int HeartRateMax;
 
+
+    public Stats statsScript;
     public static int playerKills;
     public static int playerDeaths;
     public static int RoomsCleared;
@@ -164,8 +169,9 @@ public class GameManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                Debug.Log("Quitting game...");
-                Application.Quit();
+                statsScript = GameObject.Find("Stats").GetComponent<Stats>();
+                statsScript.GetStats();
+                StartCoroutine(WaitforSave());
             }
         }
 
@@ -178,8 +184,9 @@ public class GameManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                Debug.Log("Quitting game...");
-                Application.Quit();
+                statsScript = GameObject.Find("Stats").GetComponent<Stats>();
+                statsScript.GetStats();
+                StartCoroutine(WaitforSave());
             }
         }
 
@@ -189,6 +196,13 @@ public class GameManager : MonoBehaviour
             currentDungeonTimer = timerText.text;
         }
 
+    }
+
+    IEnumerator WaitforSave()
+    {
+        Debug.Log("Quitting game...");
+        yield return new WaitForSeconds(2);
+        Application.Quit();
     }
 
 

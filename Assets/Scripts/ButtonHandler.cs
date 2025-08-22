@@ -9,4 +9,9 @@ public class ButtonHandler : MonoBehaviour
     {
         SceneManager.LoadScene("SampleScene");
     }
+
+    public void Website()
+    {
+        Application.OpenURL("https://server-6stn.onrender.com/api/stats");
+    }
 }

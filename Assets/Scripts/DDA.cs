@@ -220,7 +220,7 @@ public class DDA : MonoBehaviour
         pcgScript.lightIntensity -= (rate + GameManager.DungeonsCleared * 0.1f) / 10f;
 
         //Ensure that light intensity does not go below a minimum threshold (0.05f)
-        pcgScript.lightIntensity = Mathf.Max(0.05f, pcgScript.lightIntensity);
+        pcgScript.lightIntensity = Mathf.Max(0.15f, pcgScript.lightIntensity);
 
         Debug.Log("Decreased light intensity. Current intensity: " + pcgScript.lightIntensity);
     }
