@@ -25,6 +25,19 @@ Please follow the steps below to start the installation.
 
 ---
 
+## Game Description
+
+This game is a **first person dungeon crawler** featuring **procedurally content generated (PCG)** dungeons.
+
+Your objectives are:
+- Defeat all enemies in the dungeon.
+- Find and enter the **portal** to progress to the next level.
+- Get as many kills as possible with as few deaths as you can.
+
+The game also incorporates **Dynamic Difficulty Adjustment (DDA)** to tailor the difficulty based on your performance.
+
+---
+
 ## How to Open the Project
 
 1. **Clone or download this repository** to your PC by following one of the methods below:
