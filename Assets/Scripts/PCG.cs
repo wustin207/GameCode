@@ -3,55 +3,81 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.UI;
 
 //This script procedurely generates the content of the level, so that every level feels different.
 
 public class PCG : MonoBehaviour
 {
     #region Enemies
+    [Header("Enemies")]
     public GameObject[] enemyPrefabs;
-    //Minimum zombie count
-    public int minZombieCount = 4;
-    //Maximum zombie count
-    public int maxZombieCount = 7;
+    public int minEnemyCount = 4;
+    public int maxEnemyCount = 7;
     public int minTrapCount;
     public int maxTrapCount;
+    public int minDistanceToEnemies = 10;
     #endregion
-    public SuccessRatioDisplay successRatio;
+
+    #region Items
+    [Header("Items")]
+    public GameObject itemPrefab;
+    public int minItemCount;
+    public int maxItemCount;
+    #endregion
+
+    #region Environment Prefabs
+    [Header("Environment Prefabs")]
     public GameObject wallPrefab;
     public GameObject floorPrefab;
     public GameObject roofPrefab;
-    public GameObject itemPrefab;
     public GameObject trapDoorPrefab;
     public GameObject trapSpikesPrefab;
     public GameObject portalPrefab;
     public GameObject playerPrefab;
-    //Minimum item count
-    public int minItemCount = 5;
-    //Maximum item count
-    public int maxItemCount = 10;
+    #endregion
+
+    #region Map Generation
+    [Header("Map")]
     public int minWidth;
     public int maxWidth;
     public int minHeight;
     public int maxHeight;
-    public int fillPercentage = 1;
-    public int smoothingIterations = 5;
-    public int minDistanceToEnemies = 10;
+    public int fillPercentage;
+    public int smoothingIterations;
     public float lightIntensity;
-    private CharacterController characterController;
     public int[,] map;
     public int width;
     public int height;
+    #endregion
+
+    #region Components
+    [Header("Components")]
+    public SuccessRatioDisplay successRatio;
+    private CharacterController characterController;
     private NavMeshSurface navMeshSurface;
     private DDA ddaScript;
+    #endregion
+
+    #region UI
+    [Header("UI")]
+    public Image fadePanel;
+    private float fadeDuration = 5f;
+    #endregion
 
     private void Start()
     {
-
-        minZombieCount = 4;
-        maxZombieCount = 7;
+        //The minimum and maximum enemies can spawn
+        minEnemyCount = 4;
+        maxEnemyCount = 7;
+        //The minimumm and maximum traps can spawn
         minTrapCount = 1;
-        maxTrapCount = 4;
+        maxTrapCount = 6;
+        //The minimumm and maximum of health items that can spawn
+        minItemCount = 1;
+        maxItemCount = 4;
+        
+
         characterController = playerPrefab.GetComponent<CharacterController>();
         //The minimum and maximum width the Dungeon can get randomized
         minWidth = 50;
@@ -59,6 +85,7 @@ public class PCG : MonoBehaviour
         //Randomize the width and height of the Dungeon
         width = Random.Range(minWidth, maxWidth + 1);
         height = Random.Range(minHeight, maxHeight + 1);
+
         GameManager.RoomsCleared = 0;
         navMeshSurface = GetComponent<NavMeshSurface>();
         lightIntensity = 0.5f;
@@ -73,8 +100,8 @@ public class PCG : MonoBehaviour
 
     public void GenerateMap()
     {
-        //If the player completes more than 4 levels, the game loads the win scene.
-        if (GameManager.RoomsCleared > 1)
+        //If the player completes more than 3 levels, the game loads the win scene.
+        if (GameManager.RoomsCleared > 3)
         {
             Debug.Log("Game Finished");
             WinScene();
@@ -103,7 +130,7 @@ public class PCG : MonoBehaviour
     {
         yield return new WaitForSeconds(4f);
         navMeshSurface.BuildNavMesh();
-        SpawnZombies();
+        SpawnEnemies();
         SpawnPortal();
         FindObjectOfType<MinimapManager>().SpawnPlayerDot();
         FindObjectOfType<MinimapManager>().SpawnEnemyDots();
@@ -113,6 +140,7 @@ public class PCG : MonoBehaviour
         {
             Debug.Log("Reachable");
         }
+        //If not, reload the game to prevent from the player getting stuck
         else
         {
             GameObject mainCanvas = GameObject.Find("MainCanvas");
@@ -242,10 +270,6 @@ public class PCG : MonoBehaviour
 
         map = newMap;
     }
-
-
-
-
     #endregion
 
     private void DrawMap()
@@ -296,12 +320,14 @@ public class PCG : MonoBehaviour
 
         //Spawn the player
         Vector3 playerSpawnPosition = FindPlayerSpawnPosition();
+        //If its the first match of the player, instantiate a player prefab
         if (GameManager.RoomsCleared < 1)
         {
             GameObject player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
             player.name = "Player(Clone)";
 
         }
+        //If not, reposition the existing player
         else
         {
             //Destroy the previous player GameObject
@@ -312,6 +338,7 @@ public class PCG : MonoBehaviour
 
         MinimapManager minimapManager = FindObjectOfType<MinimapManager>();
         minimapManager.playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        //Spawn all dots icons on the minimap
         minimapManager.SpawnPlayerDot();
         minimapManager.SpawnEnemyDots();
         minimapManager.SpawnItemDots();
@@ -319,9 +346,9 @@ public class PCG : MonoBehaviour
 
 
     #region Enemies
-    private void SpawnZombies()
+    private void SpawnEnemies()
     {
-        int zombieCount = Random.Range(minZombieCount, maxZombieCount);
+        int zombieCount = Random.Range(minEnemyCount, maxEnemyCount);
 
         for (int i = 0; i < zombieCount; i++)
         {
@@ -408,7 +435,7 @@ public class PCG : MonoBehaviour
     #region Items
     private void SpawnItems()
     {
-        //Randomise the item count
+        //Randomise the item count within the minitemCount and maxItemCount range
         int itemCount = Random.Range(minItemCount, maxItemCount + 1);
 
         for (int i = 0; i < itemCount; i++)
@@ -558,9 +585,6 @@ public class PCG : MonoBehaviour
     }
     #endregion
 
-
-
-
     private void SmoothMap()
     {
         for (int x = 0; x < width; x++)
@@ -580,7 +604,7 @@ public class PCG : MonoBehaviour
         }
     }
 
-    //Method to check how many walls are near
+    //Method to check how many walls are near the object
     private int GetSurroundingWallCount(int gridX, int gridY)
     {
         int wallCount = 0;
@@ -604,8 +628,6 @@ public class PCG : MonoBehaviour
         return wallCount;
     }
 
-
-
     private void SpawnLightAtPosition(Vector3 position)
     {
         //Create an empty gameObject
@@ -617,7 +639,7 @@ public class PCG : MonoBehaviour
         lightComponent.range = 200f;
         //Set the light intensity
         lightComponent.intensity = lightIntensity;
-        //Give the gameObject a tag called "Light"
+        //Give the gameObject a tag "Light"
         lightComponent.tag = "Light";
     }
 
@@ -632,12 +654,29 @@ public class PCG : MonoBehaviour
         }
     }
 
+    //Method to switch to the Win scene
     public void WinScene()
     {
-
+        //Fade to black to smoothly transition the scene
+        StartCoroutine(FadeToBlack());
         GameManager.DungeonsCleared++;
         successRatio.UpdateSuccessRatioText();
         StartCoroutine(LoadWin());
+    }
+
+    public IEnumerator FadeToBlack()
+    {
+        float elapsed = 0f;
+        Color c = fadePanel.color;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            c.a = Mathf.Clamp01(elapsed / fadeDuration);
+            fadePanel.color = c;
+            yield return null;
+        }
+        c.a = 1f;
+        fadePanel.color = c;
     }
 
     IEnumerator LoadWin()
@@ -646,6 +685,5 @@ public class PCG : MonoBehaviour
         Player.canTakeDamage = false;
         yield return new WaitForSeconds(5f);
         SceneManager.LoadScene("Win");
-
     }
 }

@@ -5,13 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class ButtonHandler : MonoBehaviour
 {
+    //Loads the game scene
     public void StartGame()
     {
         SceneManager.LoadScene("SampleScene");
     }
 
+    //Loads the website link
     public void Website()
     {
-        Application.OpenURL("https://server-6stn.onrender.com/api/stats");
+        Application.OpenURL("https://website-9lka.onrender.com/");
     }
 }

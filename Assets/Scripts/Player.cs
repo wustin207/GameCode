@@ -10,19 +10,31 @@ using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
+    #region References
+    [Header("References")]
     private GameObject dungeonGenerator;
     public SuccessRatioDisplay successRatio;
     public InputActionAsset inputActionAsset;
+    #endregion
 
+    #region Health
+    [Header("Health")]
     public int maxHealth;
     public int currentHealth;
     public int increaseHealth;
     public Slider healthBar;
-    public static bool canTakeDamage = true;
+    public static bool canTakeDamage;
     public float damageCooldownDuration = 1f;
+    #endregion
+
+    #region Kill/Death Stat
+    [Header("Kill/Death Stat")]
     public float killDeathRatio;
     public Text killDeathRatioText;
+    #endregion
 
+    #region UI & Visuals
+    [Header("UI & Visuals")]
     public Image fadePanel;
     private float fadeDuration = 5f;
 
@@ -31,6 +43,8 @@ public class Player : MonoBehaviour
     private Coroutine flashCoroutine;
     public float flashDuration = 0.1f;
     public Color flashColor = Color.red;
+    #endregion
+
 
     public int MaxHealth
     {
@@ -57,6 +71,7 @@ public class Player : MonoBehaviour
         get { return GameManager.playerDeaths; }
     }
 
+    //Gets the radius of the player
     public float PlayerRadius
     {
         get
@@ -73,11 +88,15 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        canTakeDamage = true;
+
+        //Every time the player dies, the player spawns with an extra 5 health
         int additionalHealth = GameManager.playerDeaths * 5;
         maxHealth += additionalHealth;
         currentHealth = maxHealth;
         GameObject healthBarObject = GameObject.Find("Health_Bar");
 
+        //Health bar to reflect the current health of the player
         if (healthBarObject != null)
         {
             healthBar = healthBarObject.GetComponent<Slider>();
@@ -85,8 +104,7 @@ public class Player : MonoBehaviour
             healthBar.value = currentHealth;
         }
 
-        canTakeDamage = true;
-
+        //Get the arm of the player so that the arm can change the color to green or red.
         GameObject Arm = GameObject.Find("SK_FP_CH_Default_Root");
         Renderer[] allRenderers = Arm.GetComponentsInChildren<Renderer>();
         foreach (Renderer rend in allRenderers)
@@ -118,10 +136,6 @@ public class Player : MonoBehaviour
         else
         {
             PCG pcgScript = dungeonObject.GetComponent<PCG>();
-
-            //successRatio = successRatioObject.GetComponent<SuccessRatioDisplay>();
-            //killDeathRatioText = KDRatio.GetComponent<Text>();
-
             dungeonGenerator = dungeonObject;
         }
 
@@ -152,21 +166,19 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(Die());
         }
-
-
         killDeathRatio = (float)PlayerKills / Mathf.Max(1, PlayerDeaths);
-        //killDeathRatioText.text = "Kill/Death Ratio: " + killDeathRatio.ToString("F2");
-
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        //If the player touches a spike trap, they get damaged for 40 health.
         if (collision.gameObject.CompareTag("Spike"))
         {
                 TakeDamage(40);
         }
     }
 
+    //If the player gets damaged, their color flashes red
     private IEnumerator FlashRed()
     {
         foreach (Renderer rend in renderersToFlash)
@@ -191,6 +203,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    //If the player gets health back, their color flashes green
     private IEnumerator FlashGreen()
     {
         foreach (Renderer rend in renderersToFlash)
@@ -215,6 +228,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    //Player takes damage
     public void TakeDamage(int damage)
     {
         if (canTakeDamage)
@@ -250,23 +264,24 @@ public class Player : MonoBehaviour
         inputActionAsset.Disable();
         GameManager.playerDeaths++;
         GameManager.DungeonsFailed++;
-        //successRatio.UpdateSuccessRatioText();
         Debug.Log("Player has died." + " " + "With a total amount of " + GameManager.playerDeaths);
+
         //Reset the player's health
         currentHealth = maxHealth;
         if (healthBar != null)
         {
             healthBar.value = currentHealth;
         }
+
+        //Fade the black to ensure smooth transition to Lose scene
         yield return StartCoroutine(FadeToBlack());
         yield return new WaitForSeconds(1f);
         canTakeDamage = true;
         inputActionAsset.Enable();
         SceneManager.LoadScene("Lose");
-
     }
 
-    private IEnumerator FadeToBlack()
+    public IEnumerator FadeToBlack()
     {
         float elapsed = 0f;
         Color c = fadePanel.color;
@@ -281,6 +296,7 @@ public class Player : MonoBehaviour
         fadePanel.color = c;
     }
 
+    //Turns off the ability for the player to take damage for a few seconds
     private IEnumerator DamageCooldown()
     {
         canTakeDamage = false;
@@ -290,6 +306,9 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        GameObject pickupUIObject = GameObject.FindGameObjectWithTag("PickupUI");
+
+        //If the player touches the health game objects, their current health increases
         if (other.CompareTag("Health"))
         {
             if (currentHealth < maxHealth)
@@ -300,9 +319,6 @@ public class Player : MonoBehaviour
                 {
                     healthBar.value = currentHealth;
                 }
-
-
-                GameObject pickupUIObject = GameObject.FindGameObjectWithTag("PickupUI");
 
                 if (pickupUIObject != null)
                 {
@@ -329,15 +345,14 @@ public class Player : MonoBehaviour
                     StopCoroutine(flashCoroutine);
                 }
                 flashCoroutine = StartCoroutine(FlashGreen());
-
                 Destroy(other.gameObject);
-
             }
             else
             {
                 Debug.Log("Health is full");
             }
         }
+        //If the player touches the portal game object, it will check if there are any enemies remaining, if not then generate the map again
         else if (other.CompareTag("Portal"))
         {
             if (!dungeonGenerator.GetComponent<PCG>().AreEnemiesRemaining())
@@ -357,11 +372,23 @@ public class Player : MonoBehaviour
             }
             else
             {
-                Debug.Log("Cannot progress to another dungeon. Clear all enemies first.");
+                Text pickupText = pickupUIObject.GetComponent<Text>();
+
+                if (pickupText != null)
+                {
+                    pickupText.text = "You need to defeat all enemies first.";
+                    //Start a coroutine to hide the text after 2 seconds
+                    StartCoroutine(HidepickupTextUI(pickupText, 2f));
+                }
+                else
+                {
+                    Debug.LogError("TextMeshPro component not found on the object with the tag 'PickupUI'.");
+                }
             }
         }
     }
 
+    //Method to hide the pick up UI text from the screen after a few seconds
     private IEnumerator HidepickupTextUI(Text text, float delay)
     {
         yield return new WaitForSeconds(delay);

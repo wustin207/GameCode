@@ -7,28 +7,44 @@ using UnityEngine.AI;
 
 public class SkeletonAI : MonoBehaviour
 {
+    #region Movement & AI
+    [Header("Movement & AI")]
     public float moveSpeed;
     public float followDistance = 10f;
-    public int damageAmount = 20;
-    public int maxHealth = 50;
     public bool isFollowing = false;
 
     //Fuzzy logic output
     public float aggressionLevel;
+    #endregion
 
-    private GameObject player;
+    #region Combat
+    [Header("Combat")]
+    public int damageAmount;
+    public int maxHealth = 50;
     public int currentHealth;
+    #endregion
 
+    #region Components
+    [Header("Components")]
+    private GameObject player;
     private NavMeshAgent navMeshAgent;
-
     private Animator skeletonAnimator;
+    #endregion
 
+    #region Audio
+    [Header("Audio")]
+    [SerializeField] private AudioClip shootAudioClip;
+    public AudioSource audioSource;
+    #endregion
+
+    #region Visual Effects
+    [Header("Visual Effects")]
     private List<Renderer> renderersToFlash = new List<Renderer>();
     private List<Color[]> originalColors = new List<Color[]>();
     private Coroutine flashCoroutine;
     public float flashDuration = 0.1f;
     public Color flashColor = Color.red;
-
+    #endregion
 
     private void Start()
     {
@@ -36,6 +52,7 @@ public class SkeletonAI : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         StartCoroutine(SetHealth());
 
+        //Enemy flashes red when they are damaged
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer rend in allRenderers)
         {
@@ -60,6 +77,7 @@ public class SkeletonAI : MonoBehaviour
 
     private void Update()
     {
+        //Calculate distance between this enemy to the player
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
 
         //Calculate move speed based on player distance
@@ -71,6 +89,7 @@ public class SkeletonAI : MonoBehaviour
         //Combine aggression levels from fuzzy logic and health
         aggressionLevel = Mathf.Max(aggressionLevel, healthAggression);
 
+        //If the distance calculation is less than the follow distance, this enemy starts following the player
         if (distanceToPlayer <= followDistance)
         {
             isFollowing = true;
@@ -89,6 +108,15 @@ public class SkeletonAI : MonoBehaviour
 
         }
 
+    }
+
+    //This method is being called as an event in the Animation so that the sound  always plays at the exact animation.
+    public void PlayShootSound()
+    {
+        if (shootAudioClip != null)
+        {
+            audioSource.PlayOneShot(shootAudioClip);
+        }
     }
 
     private IEnumerator SetHealth()
@@ -163,6 +191,7 @@ public class SkeletonAI : MonoBehaviour
 
     #endregion
 
+    //Method so that this enemy flashes red whenever they get damaged
     private IEnumerator FlashRed()
     {
         // Flash red
@@ -221,12 +250,13 @@ public class SkeletonAI : MonoBehaviour
 
     private void Die()
     {
-        Player playerScript = player.gameObject.GetComponent<Player>();
-        Debug.Log("Skeleton died.");
+        //Increase the player kills amount
         GameManager.playerKills++;
+        //Destroy this game object
         Destroy(gameObject);
     }
 
+    //When colliding with the player, start damaging the player
     private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player"))

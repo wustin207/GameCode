@@ -848,11 +848,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 23b32a68-0cc7-4bc5-a6e6-de1c2e297c16
+  cloudProjectId: fc8dbb3f-4ae9-40a5-8c65-3a08892bf23e
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Thesis_Assignment
-  organizationId: jb996
+  projectName: New Unity Project
+  organizationId: mewantedgames
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

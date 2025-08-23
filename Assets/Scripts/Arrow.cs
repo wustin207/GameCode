@@ -17,6 +17,7 @@ public class Arrow : MonoBehaviour
         damage = dmg;
     }
 
+    //If the arrow collides with the player, the player takes damage, and this game object destroys.
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("Player"))

@@ -8,17 +8,29 @@ using UnityEngine.Networking;
 [System.Serializable]
 public class PlayerStats
 {
+    #region Player
+    [Header("Player")]
     public string playerKills;
     public string playerDeaths;
+    #endregion
+
+    #region Timer
+    [Header("Timer")]
     public string totalTimer;
+    #endregion
+
+    #region HeartRate
+    [Header("HeartRate")]
     public int heartRateAvg;
     public int heartRateMin;
     public int heartRateMax;
+    #endregion
 }
 
 
 public class Stats : MonoBehaviour
 {
+    //Server API to send the data to
     public string serverURL = "https://server-6stn.onrender.com/api/stats";
     public GraphTest graph;
     public GameManager manager;
@@ -37,7 +49,7 @@ public class Stats : MonoBehaviour
 
         graph = GameObject.Find("Graph").GetComponent<GraphTest>();
 
-
+        //Bundle the stats into a list
         PlayerStats stats = new PlayerStats
         {
             playerKills = playerKillsText,
@@ -47,11 +59,12 @@ public class Stats : MonoBehaviour
             heartRateMin = graph.minHeartRate,
             heartRateMax = graph.maxHeartRate
         };
-
+        //Make the stats into a json file, and then POST them to the server URL
         string json = JsonUtility.ToJson(stats);
         StartCoroutine(SendStats(json));
     }
 
+    //Post the stats in the server URL
     public IEnumerator SendStats(string json)
     {
         UnityWebRequest request = new UnityWebRequest(serverURL, "POST");
@@ -59,7 +72,6 @@ public class Stats : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-
 
         yield return request.SendWebRequest();
 

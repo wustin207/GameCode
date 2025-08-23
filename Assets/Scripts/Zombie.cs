@@ -7,27 +7,46 @@ using UnityEngine.AI;
 
 public class Zombie : MonoBehaviour
 {
+    #region Movement
+    [Header("Movement")]
     public float moveSpeed;
     public float followDistance = 10f;
-    public int damageAmount = 20;
-    public int maxHealth = 50;
     public bool isFollowing = false;
+    #endregion
 
+    #region Health
+    [Header("Health")]
+    public int damageAmount;
+    public int maxHealth = 50;
+    public int currentHealth;
+    #endregion
+
+    #region Fuzzy Logic
+    [Header("Fuzzy Logic")]
     //Fuzzy logic output
     public float aggressionLevel;
+    #endregion
 
+    #region Player & Zombie
+    [Header("Player & Zombie")]
     private GameObject player;
-    public int currentHealth;
-
     private NavMeshAgent navMeshAgent;
-
     private Animator zombieAnimator;
+    #endregion
 
+    #region Visuals
+    [Header("Visuals")]
     private List<Material> originalMaterials = new List<Material>();
     private List<Renderer> renderersToFlash = new List<Renderer>();
     private Coroutine flashCoroutine;
     public float flashDuration = 4.1f;
+    #endregion
 
+    #region Audio
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip attackSound;
+    #endregion
 
     private void Start()
     {
@@ -82,6 +101,16 @@ public class Zombie : MonoBehaviour
 
         }
     }
+
+    //This method is being called as an event in the Animation so that the sound always plays at the exact animation.
+    public void PlayAttackSound()
+    {
+        if (audioSource != null && attackSound != null)
+        {
+            audioSource.PlayOneShot(attackSound);
+        }
+    }
+
 
     private IEnumerator SetHealth()
     {
@@ -140,10 +169,9 @@ public class Zombie : MonoBehaviour
 
     }
 
-
+    //Calculate aggression based on health
     private float CalculateAggressionLevelHealth()
     {
-        //Calculate aggression based on health
         float aggression = Mathf.Clamp01(1f - (float)currentHealth / maxHealth);
         return aggression;
     }
@@ -155,6 +183,7 @@ public class Zombie : MonoBehaviour
 
     #endregion
 
+    //Method so that this enemy flashes red whenever they get damaged
     private IEnumerator FlashRed()
     {
         // Set all renderer materials to red
@@ -206,12 +235,13 @@ public class Zombie : MonoBehaviour
 
     private void Die()
     {
-        Player playerScript = player.gameObject.GetComponent<Player>();
-        Debug.Log("Zombie died.");
+        //Increase the player kills amount
         GameManager.playerKills++;
+        //Destroy this game object
         Destroy(gameObject);
     }
 
+    //When colliding with the player, start damaging the player
     private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player"))

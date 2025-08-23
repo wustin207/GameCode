@@ -33,7 +33,7 @@ namespace InfimaGames.LowPolyShooterPack
         [Range(0.0f, 1.0f)]
         [SerializeField]
         private float volume;
-
+        
         [Tooltip("Spatial Blend.")]
         [Range(0.0f, 1.0f)]
         [SerializeField]

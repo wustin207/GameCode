@@ -8,11 +8,13 @@ using System.Collections;
 
 public class GraphTest : MonoBehaviour
 {
+    [Header("Player")]
     #region Player
     private Player playerScript;
     #endregion
 
-    #region Heart Rate
+    [Header("HeartRate")]
+    #region HeartRate
     public LineRenderer lineRenderer;
     public int maxDataPoints = 10000;
     public int maxValue = 100;
@@ -31,16 +33,19 @@ public class GraphTest : MonoBehaviour
     public int minHeartRate;
     public int maxHeartRate;
     public int averageHeartRate;
+
+    private List<int> heartRates = new List<int>();
     #endregion
 
+    [Header("Scene")]
+    #region Scene
     private static GraphTest instance;
-    private List<int> heartRates = new List<int>();
-
     Scene currentScene;
-
+    #endregion
 
     void Start()
     {
+        //Wait for the heart rate to start counting before getting the minimum heart rate
         StartCoroutine(WaitForHR());
 
         if (instance == null)
@@ -75,6 +80,7 @@ public class GraphTest : MonoBehaviour
         
     }
 
+    //Waits 10 seconds before the minimum heart rate starts recording
     public IEnumerator WaitForHR()
     {
         yield return new WaitForSeconds(10f);
@@ -95,7 +101,7 @@ public class GraphTest : MonoBehaviour
             playerScript = player.GetComponent<Player>();
         }
 
-        //Output min, max, and average heart rates when a scene is unloaded
+        //Output min, max, and average heart rates when a scene is either Win or Lose
         if (scene == "Win" || scene == "Lose")
         {
 
@@ -112,7 +118,7 @@ public class GraphTest : MonoBehaviour
             Debug.Log("Average Heart Rate: " + averageHeartRate);
         }
 
-
+        //Update timer every second and then add a data point in the graph
         timer += updateInterval;
         AddDataPoint((int)hyperateSocket.heartRate, playerScript.CurrentHealth);
 
@@ -128,7 +134,7 @@ public class GraphTest : MonoBehaviour
             timer = 0f;
         }
 
-        //Add the current heart rate value to the list
+        //Add the current heart rate value to the graph list
         heartRates.Add((int)hyperateSocket.heartRate);
 
         if ((int)hyperateSocket.heartRate > 20 && (int)hyperateSocket.heartRate < minHeartRate)
@@ -136,7 +142,7 @@ public class GraphTest : MonoBehaviour
             minHeartRate = (int)hyperateSocket.heartRate;
         }
 
-        //Ensure the heartRates list doesn't exceed the maxDataPoints
+        //Ensure the heartRates list doesn't exceed the maxDataPoints to prevent from the graph to be too long
         if (heartRates.Count > maxDataPoints)
         {
             heartRates.RemoveAt(0);

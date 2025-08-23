@@ -9,37 +9,55 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    #region UI
+    [Header("UI")]
     public Timer timerDisplay;
     public Text timerText;
-    private float startTime;
-    public float currentTime;
-    public Player playerScript;
-    public int HeartRateAverage;
-    public int HeartRateMin;
-    public int HeartRateMax;
 
-
-    public Stats statsScript;
-    public static int playerKills;
-    public static int playerDeaths;
-    public static int RoomsCleared;
-    public static int DungeonsCleared;
-    public static int DungeonsFailed = 0;
-    public static string currentDungeonTimer;
     public TextMeshProUGUI currentDungeonTimerText;
     public TextMeshProUGUI dungeonsClearedText;
     public TextMeshProUGUI totalTimerText;
     public TextMeshProUGUI playerKillsText;
     public TextMeshProUGUI playerDeathsText;
-    Scene currentScene;
+    #endregion
 
+    #region Time
+    [Header("Time")]
+    private float startTime;
+    public float currentTime;
+    public static string currentDungeonTimer;
+    #endregion
+
+    #region Player & Stats
+    [Header("Player & Stats")]
+    public Player playerScript;
+    public Stats statsScript;
     private static GameManager instance;
+    #endregion
 
-    private void Start()
+    #region HeartRate
+    [Header("HeartRate")]
+    public int HeartRateAverage;
+    public int HeartRateMin;
+    public int HeartRateMax;
+    #endregion
+
+    #region Gameplay Stats
+    [Header("Gameplay Stats")]
+    public static int playerKills;
+    public static int playerDeaths;
+    public static int RoomsCleared;
+    public static int DungeonsCleared;
+    public static int DungeonsFailed = 0;
+    #endregion
+
+    #region Scene
+    [Header("Scene")]
+    Scene currentScene;
+    #endregion
+
+    private void Awake()
     {
-
-        currentScene = SceneManager.GetActiveScene();
-
         if (instance == null)
         {
             instance = this;
@@ -49,21 +67,25 @@ public class GameManager : MonoBehaviour
         else
         {
             //Destroy duplicate GameManager objects
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        currentScene = SceneManager.GetActiveScene();
 
         if (currentScene.name == "SampleScene" && startTime == 0f)
         {
+            //Start timer
             startTime = Time.time;
         }
-
     }
 
 
-    // Called when a new scene is loaded
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-
+        //Check if the loaded scene is "SampleScene" and get the Timer
         if(scene.name == "SampleScene")
         {
             timerText = GameObject.FindWithTag("Timer").GetComponent<Text>();
@@ -99,10 +121,10 @@ public class GameManager : MonoBehaviour
             totalTimerText.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
         }
 
+        //Check if the loaded scene is "Win" and destroy the MainCanvas if found
         if (scene.name == "Win")
         {
             currentDungeonTimerText = GameObject.FindWithTag("dungeonTimer").GetComponent<TextMeshProUGUI>();
-            //dungeonsClearedText = GameObject.FindWithTag("dungeonCleared").GetComponent<TextMeshProUGUI>();
             totalTimerText = GameObject.FindWithTag("totalTime").GetComponent<TextMeshProUGUI>();
             playerKillsText = GameObject.FindWithTag("playerKills").GetComponent<TextMeshProUGUI>();
             playerDeathsText = GameObject.FindWithTag("playerDeaths").GetComponent<TextMeshProUGUI>();
@@ -117,8 +139,6 @@ public class GameManager : MonoBehaviour
             currentDungeonTimerText.text = currentDungeonTimer.ToString();
             playerKillsText.text = playerKills.ToString();
             playerDeathsText.text = playerDeaths.ToString();
-            //dungeonsClearedText.text = DungeonsCleared.ToString();
-
 
             //Convert Time.realtimeSinceStartup to minutes, seconds, and milliseconds
             float totalTimeInSeconds = Time.realtimeSinceStartup;
@@ -129,10 +149,7 @@ public class GameManager : MonoBehaviour
             totalTimerText.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, milliseconds);
 
             currentTime = 0f;
-
             startTime = Time.time;
-
-
         }
     }
 
@@ -163,10 +180,12 @@ public class GameManager : MonoBehaviour
 
         else if(scene == "Lose")
         {
+            //if the player presses "R", the game restarts
             if (Input.GetKeyDown(KeyCode.R))
             {
                 SceneManager.LoadScene("SampleScene");
             }
+            //else if the player presses "Q" the game gets and sends the player data and then shuts down
             else if (Input.GetKeyDown(KeyCode.Q))
             {
                 statsScript = GameObject.Find("Stats").GetComponent<Stats>();
@@ -177,11 +196,12 @@ public class GameManager : MonoBehaviour
 
         else if(scene == "Win")
         {
+            //if the player presses "C", the game continues
             if (Input.GetKeyDown(KeyCode.C))
             {
-                Debug.Log("Loading SampleScene...");
                 SceneManager.LoadScene("SampleScene");
             }
+            //else if the player presses "Q" the game gets and sends the player data and then shuts down
             else if (Input.GetKeyDown(KeyCode.Q))
             {
                 statsScript = GameObject.Find("Stats").GetComponent<Stats>();
@@ -205,8 +225,7 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
-
-
+    //Structure of the timer
     private void UpdateStartTimer()
     {
         currentTime = Time.time - startTime;

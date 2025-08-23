@@ -8,18 +8,28 @@ using UnityEngine.SceneManagement;
 
 public class DDA : MonoBehaviour
 {
+    #region References
+    [Header("References")]
     private Player player;
     private PCG pcgScript;
     private Zombie[] zombies;
     private SkeletonAI[] skeletons;
+    private ArcherAI[] archers;
+    #endregion
 
+    #region Difficulty
+    [Header("Difficulty")]
     public float minDifficultyChangeRate;
     public float maxDifficultyChangeRate;
 
     public float increaseDifficultyThreshold;
     public float decreaseDifficultyThreshold;
+    #endregion
 
+    #region State
+    [Header("State")]
     public bool ScriptLoaded = false;
+    #endregion
 
     private void Start()
     {
@@ -134,26 +144,26 @@ public class DDA : MonoBehaviour
     //Increase the game difficulty by increasing the amount of enemies
     private void IncreaseDifficulty(float rate)
     {
-        pcgScript.minZombieCount += Mathf.RoundToInt(rate + GameManager.DungeonsCleared);
-        pcgScript.maxZombieCount += Mathf.RoundToInt(rate + GameManager.DungeonsCleared);
+        pcgScript.minEnemyCount += Mathf.RoundToInt(rate + GameManager.DungeonsCleared);
+        pcgScript.maxEnemyCount += Mathf.RoundToInt(rate + GameManager.DungeonsCleared);
 
         Debug.Log("Increasing game difficulty with rate of " + rate);
-        Debug.Log("MinZombieCount: " + pcgScript.minZombieCount);
-        Debug.Log("MaxZombieCount: " + pcgScript.maxZombieCount);
+        Debug.Log("minEnemyCount: " + pcgScript.minEnemyCount);
+        Debug.Log("maxEnemyCount: " + pcgScript.maxEnemyCount);
     }
 
     //Decrease the game difficulty by decreasing the amount of enemies
     private void DecreaseDifficulty(float rate)
     {
-        //Mathf.Max ensures that minZombieCount does not go below 4
-        pcgScript.minZombieCount = Mathf.Max(4, pcgScript.minZombieCount - Mathf.RoundToInt(rate));
-        //Mathf.Max ensure that maxZombieCount is greater than or equal to minZombieCount
-        pcgScript.maxZombieCount = Mathf.Max(pcgScript.minZombieCount, pcgScript.maxZombieCount - Mathf.RoundToInt(rate));
+        //Mathf.Max ensures that minEnemyCount does not go below 4
+        pcgScript.minEnemyCount = Mathf.Max(4, pcgScript.minEnemyCount - Mathf.RoundToInt(rate));
+        //Mathf.Max ensure that maxEnemyCount is greater than or equal to minEnemyCount
+        pcgScript.maxEnemyCount = Mathf.Max(pcgScript.minEnemyCount, pcgScript.maxEnemyCount - Mathf.RoundToInt(rate));
 
 
         Debug.Log("Decreasing game difficulty with rate of " + rate);
-        Debug.Log("MinZombieCount: " + pcgScript.minZombieCount);
-        Debug.Log("MaxZombieCount: " + pcgScript.maxZombieCount);
+        Debug.Log("minEnemyCount: " + pcgScript.minEnemyCount);
+        Debug.Log("maxEnemyCount: " + pcgScript.maxEnemyCount);
 
     }
 
@@ -162,11 +172,16 @@ public class DDA : MonoBehaviour
     {
         yield return new WaitForSeconds(5f);
         zombies = FindObjectsOfType<Zombie>();
+        archers = FindObjectsOfType<ArcherAI>();
         skeletons = FindObjectsOfType<SkeletonAI>();
 
         if (zombies == null)
         {
             Debug.LogError("Zombie script not found in the scene.");
+        }
+        if (archers == null)
+        {
+            Debug.LogError("Archer script not found in the scene.");
         }
         if (skeletons == null)
         {
@@ -176,6 +191,11 @@ public class DDA : MonoBehaviour
         foreach (var zombie in zombies)
         {
             zombie.maxHealth = 15 + GameManager.DungeonsCleared;
+        }
+
+        foreach (var archer in archers)
+        {
+            archer.maxHealth = 15 + GameManager.DungeonsCleared;
         }
 
         foreach (var skeleton in skeletons)
@@ -189,11 +209,16 @@ public class DDA : MonoBehaviour
     {
         yield return new WaitForSeconds(5f);
         zombies = FindObjectsOfType<Zombie>();
+        archers = FindObjectsOfType<ArcherAI>();
         skeletons = FindObjectsOfType<SkeletonAI>();
 
         if (zombies == null)
         {
             Debug.LogError("Zombie script not found in the scene.");
+        }
+        if (archers == null)
+        {
+            Debug.LogError("Archer script not found in the scene.");
         }
         if (skeletons == null)
         {
@@ -203,6 +228,11 @@ public class DDA : MonoBehaviour
         foreach (var zombie in zombies)
         {
             zombie.maxHealth = 8;
+        }
+
+        foreach (var archer in archers)
+        {
+            archer.maxHealth = 8;
         }
 
         foreach (var skeleton in skeletons)
@@ -219,7 +249,7 @@ public class DDA : MonoBehaviour
     {
         pcgScript.lightIntensity -= (rate + GameManager.DungeonsCleared * 0.1f) / 10f;
 
-        //Ensure that light intensity does not go below a minimum threshold (0.05f)
+        //Ensure that light intensity does not go below a minimum threshold (0.15f)
         pcgScript.lightIntensity = Mathf.Max(0.15f, pcgScript.lightIntensity);
 
         Debug.Log("Decreased light intensity. Current intensity: " + pcgScript.lightIntensity);
@@ -243,12 +273,12 @@ public class DDA : MonoBehaviour
     //Increase the game difficulty by increasing the amount of traps available in the level.
     private void IncreaseTraps(float rate)
     {
-        pcgScript.minTrapCount = Mathf.Max(1, pcgScript.minTrapCount + Mathf.RoundToInt(rate) + GameManager.DungeonsCleared);
-        pcgScript.maxTrapCount = Mathf.Min(6, pcgScript.maxTrapCount + Mathf.RoundToInt(rate) + GameManager.DungeonsCleared);
+        //Ensure that there are no less than minTrapCount traps, and no more than maxTrapCount and than adjust the amount based on the difficulty change.
+        pcgScript.minTrapCount = Mathf.Max(pcgScript.minTrapCount, pcgScript.minTrapCount + Mathf.RoundToInt(rate) + GameManager.DungeonsCleared);
+        pcgScript.maxTrapCount = Mathf.Min(pcgScript.minTrapCount, pcgScript.maxTrapCount + Mathf.RoundToInt(rate) + GameManager.DungeonsCleared);
 
 
         Debug.Log("Increasing the trap amount with rate of " + rate);
-
         Debug.Log("MinTrapCount: " + pcgScript.minTrapCount);
         Debug.Log("MaxTrapCount: " + pcgScript.maxTrapCount);
     }
@@ -256,11 +286,11 @@ public class DDA : MonoBehaviour
     //Decrease the game difficulty by decreasing the amount of traps available in the level.
     private void DecreaseTraps(float rate)
     {
-        pcgScript.minTrapCount = Mathf.Max(1, pcgScript.minTrapCount - Mathf.RoundToInt(rate));
+        //Ensure that there are no less than minTrapCount traps, and no more than maxTrapCount and than adjust the amount based on the difficulty change.
+        pcgScript.minTrapCount = Mathf.Max(pcgScript.minTrapCount, pcgScript.minTrapCount - Mathf.RoundToInt(rate));
         pcgScript.maxTrapCount = Mathf.Max(pcgScript.minTrapCount, pcgScript.maxTrapCount - Mathf.RoundToInt(rate));
 
         Debug.Log("Decrease the trap amount with rate of " + rate);
-
         Debug.Log("MinTrapCount: " + pcgScript.minTrapCount);
         Debug.Log("MaxTrapCount: " + pcgScript.maxTrapCount);
     }

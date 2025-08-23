@@ -7,32 +7,49 @@ using UnityEngine.AI;
 
 public class ArcherAI : MonoBehaviour
 {
+    #region Movement & AI
+    [Header("Movement & AI")]
     public float moveSpeed;
     public float followDistance = 10f;
-    public int damageAmount = 20;
-    public int maxHealth = 50;
     public bool isFollowing = false;
 
     //Fuzzy logic output
     public float aggressionLevel;
+    #endregion
 
-    private GameObject player;
+    #region Combat
+    [Header("Combat")]
+    public int damageAmount;
+    public int maxHealth = 50;
     public int currentHealth;
-
-    private NavMeshAgent navMeshAgent;
-
-    private Animator archerAnimator;
-
-    private List<Renderer> renderersToFlash = new List<Renderer>();
-    private List<Color[]> originalColors = new List<Color[]>();
-    private Coroutine flashCoroutine;
-    public float flashDuration = 0.1f;
-    public Color flashColor = Color.red;
 
     public GameObject arrowPrefab;
     public Transform firePoint;
     public float attackCooldown = 2f;
     private float attackTimer = 0f;
+    #endregion
+
+    #region Components
+    [Header("Components")]
+    private GameObject player;
+    private NavMeshAgent navMeshAgent;
+    private Animator archerAnimator;
+    #endregion
+
+    #region Audio
+    [Header("Audio")]
+    [SerializeField] private AudioClip shootAudioClip;
+    public AudioSource audioSource;
+    #endregion
+
+    #region Visual Effects
+    [Header("Visual Effects")]
+    private List<Renderer> renderersToFlash = new List<Renderer>();
+    private List<Color[]> originalColors = new List<Color[]>();
+    private Coroutine flashCoroutine;
+    public float flashDuration = 0.1f;
+    public Color flashColor = Color.red;
+    #endregion
 
 
     private void Start()
@@ -48,6 +65,7 @@ public class ArcherAI : MonoBehaviour
             Debug.LogWarning("FirePoint not found.");
         }
 
+        //Enemy flashes red when they are damaged
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer rend in allRenderers)
         {
@@ -72,12 +90,15 @@ public class ArcherAI : MonoBehaviour
 
     private void Update()
     {
+        if (player == null) return;
+
+        //Calculate distance between this enemy to the player
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
 
         //Calculate move speed based on player distance
         CalculateMoveSpeedLevelDistance(distanceToPlayer);
 
-        //Calculate aggression level based on health
+        //Calculate aggression level based on health of this enemy
         float healthAggression = CalculateAggressionLevelHealth();
 
         //Combine aggression levels from fuzzy logic and health
@@ -85,6 +106,7 @@ public class ArcherAI : MonoBehaviour
 
         attackTimer += Time.deltaTime;
 
+        //If the distance calculation is less than the follow distance, this enemy starts following the player
         if (distanceToPlayer <= followDistance)
         {
             isFollowing = true;
@@ -105,6 +127,7 @@ public class ArcherAI : MonoBehaviour
 
     }
 
+    //This method is being called as an event in the Animation so that the arrow always shoots at the exact animation.
     private void Shoot()
     {
         //Shooting animation
@@ -136,6 +159,15 @@ public class ArcherAI : MonoBehaviour
         }
     }
 
+    //This method is being called as an event in the Animation so that the sound always plays at the exact animation.
+    public void PlayShootSound()
+    {
+        if (shootAudioClip != null)
+        {
+            audioSource.PlayOneShot(shootAudioClip);
+        }
+    }
+
 
     private IEnumerator SetHealth()
     {
@@ -147,25 +179,28 @@ public class ArcherAI : MonoBehaviour
 
     private void CalculateMoveSpeedLevelDistance(float distance)
     {
+        //Fuzzy logic gradually calculates the distance between this enemy to the player.
         float closeMembership = CalculateMembership(distance, 0f, 1f, 5f);
         float mediumMembership = CalculateMembership(distance, 5f, 9f, 14f);
         float farMembership = CalculateMembership(distance, 14f, 19f, 22f);
 
+        //Calculate a modified moveSpeed based on distance and membership
         float closeMoveSpeed = 0.8f;
         float mediumMoveSpeed = 1.5f;
         float farMoveSpeed = 2.5f;
 
+        //Weighted average to adjust moveSpeed based on distance and membership
         moveSpeed = Mathf.Lerp(moveSpeed, closeMoveSpeed, closeMembership);
         moveSpeed = Mathf.Lerp(moveSpeed, mediumMoveSpeed, mediumMembership);
         moveSpeed = Mathf.Lerp(moveSpeed, farMoveSpeed, farMembership);
         navMeshAgent.speed = moveSpeed;
 
+        //When the membership is close or medium, the Archer starts Attacking
         if ((closeMembership > mediumMembership && closeMembership > farMembership) ||
             (mediumMembership > closeMembership && mediumMembership > farMembership))
         {
             navMeshAgent.ResetPath();
 
-            //In close or medium range: starts shooting
             archerAnimator.SetBool("Walk", false);
             archerAnimator.SetBool("Idle", false);
             archerAnimator.SetBool("Attack", true);
@@ -199,6 +234,7 @@ public class ArcherAI : MonoBehaviour
 
     #endregion
 
+    //Method so that this enemy flashes red whenever they get damaged
     private IEnumerator FlashRed()
     {
         foreach (Renderer rend in renderersToFlash)
@@ -248,9 +284,9 @@ public class ArcherAI : MonoBehaviour
 
     private void Die()
     {
-        Player playerScript = player.gameObject.GetComponent<Player>();
-        Debug.Log("archer died.");
+        //Increase the player kills amount
         GameManager.playerKills++;
+        //Destroy this game object
         Destroy(gameObject);
     }
 }

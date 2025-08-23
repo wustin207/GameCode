@@ -3,19 +3,31 @@ using UnityEngine;
 
 public class MinimapManager : MonoBehaviour
 {
+    #region UI
+    [Header("UI")]
     public RectTransform iconsContainer;
     public GameObject playerDotPrefab;
     public GameObject enemyDotPrefab;
     public GameObject itemDotPrefab;
+    #endregion
 
+    #region Player
+    [Header("Player")]
     public Transform playerTransform;
+    #endregion
 
+    #region Minimap Settings
+    [Header("Minimap Settings")]
     public float mapScale = 4f;
     public Vector3 mapOrigin = Vector3.zero;
+    #endregion
 
+    #region Icons
+    [Header("Icons")]
     private MinimapIcon playerIcon;
     private List<MinimapIcon> enemyIcons = new List<MinimapIcon>();
     private List<MinimapIcon> itemIcons = new List<MinimapIcon>();
+    #endregion
 
     void Start()
     {
@@ -26,7 +38,7 @@ public class MinimapManager : MonoBehaviour
 
     public void SpawnPlayerDot()
     {
-
+        //If icons already exist, destroy this one
         if (playerIcon != null && playerIcon.icon != null)
         {
             Destroy(playerIcon.icon.gameObject);
@@ -35,6 +47,7 @@ public class MinimapManager : MonoBehaviour
         GameObject iconsContainerObject = GameObject.FindGameObjectWithTag("icon");
         iconsContainer = iconsContainerObject.GetComponent<RectTransform>();
 
+        //Spawn the icon of the player in the minimap
         GameObject playerDot = Instantiate(playerDotPrefab, iconsContainer);
         playerIcon = playerDot.AddComponent<MinimapIcon>();
         playerIcon.icon = playerDot.GetComponent<RectTransform>();
@@ -47,15 +60,17 @@ public class MinimapManager : MonoBehaviour
 
     public void SpawnEnemyDots()
     {
+        //Put all enemies in a list
         List<GameObject> allEnemies = new List<GameObject>();
         string[] enemyTags = { "Zombie", "Skeleton", "Archer" };
 
+        //Add tagged enemies in 1 single list (allEnemies)
         foreach (string tag in enemyTags)
         {
             GameObject[] taggedEnemies = GameObject.FindGameObjectsWithTag(tag);
             allEnemies.AddRange(taggedEnemies);
         }
-
+        //For every enemy, add a dot in the minimap
         foreach (GameObject enemy in allEnemies)
         {
             GameObject iconsContainerObject = GameObject.FindGameObjectWithTag("icon");
@@ -68,12 +83,10 @@ public class MinimapManager : MonoBehaviour
             iconScript.playerTransform = playerTransform;
 
             enemyIcons.Add(iconScript);
-
-            Debug.Log("Created icon for enemy: " + enemy.name);
-
         }
     }
 
+    //For every health item, add a dot in the minimap
     public void SpawnItemDots()
     {
         var items = GameObject.FindGameObjectsWithTag("Health");

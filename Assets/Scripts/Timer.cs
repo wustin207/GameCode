@@ -20,6 +20,7 @@ public class Timer : MonoBehaviour
 
     }
 
+    //Start the timer
     public void StartTimer()
     {
         startTime = Time.time;
@@ -34,6 +35,7 @@ public class Timer : MonoBehaviour
         }
     }
 
+    //Update the timer (Every frame) and show in minutes, second, milliseconds
     private void UpdateTimer()
     {
         float currentTime = Time.time - startTime;

@@ -1594,7 +1594,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 24300002, guid: 3fcdb23bde063e94fa0b60ccf87604d6, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.8
+  m_Volume: 0.666
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2072,7 +2072,6 @@ MonoBehaviour:
   damageCooldownDuration: 1
   killDeathRatio: 0
   killDeathRatioText: {fileID: 0}
-  HealthText: {fileID: 0}
   fadePanel: {fileID: 0}
   flashDuration: 0.1
   flashColor: {r: 1, g: 0, b: 0, a: 1}

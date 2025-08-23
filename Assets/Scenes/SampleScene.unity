@@ -274,6 +274,10 @@ MonoBehaviour:
   timerText: {fileID: 563735310}
   currentTime: 0
   playerScript: {fileID: 0}
+  HeartRateAverage: 0
+  HeartRateMin: 0
+  HeartRateMax: 0
+  statsScript: {fileID: 0}
   currentDungeonTimerText: {fileID: 0}
   dungeonsClearedText: {fileID: 0}
   totalTimerText: {fileID: 0}
@@ -656,6 +660,7 @@ MonoBehaviour:
   lightIntensity: 1
   width: 0
   height: 0
+  fadePanel: {fileID: 2145496572}
 --- !u!114 &603823049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1148,6 +1153,9 @@ MonoBehaviour:
   highHeartRateColor: {r: 0, g: 0, b: 1, a: 1}
   highHeartRateCirclePrefab: {fileID: 2939980685823761185, guid: 45e630faaa84333499a7fd4ecdfc768e, type: 3}
   textPrefab: {fileID: 1463165613600921420, guid: 02783cdc2a0898e43b30670dd2a55ce4, type: 3}
+  minHeartRate: 0
+  maxHeartRate: 0
+  averageHeartRate: 0
 --- !u!4 &1182451020
 Transform:
   m_ObjectHideFlags: 0
@@ -1401,8 +1409,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 31, y: 81}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 48.55686, y: 81}
+  m_SizeDelta: {x: 235.1137, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1707838600
 CanvasRenderer:
@@ -1435,7 +1443,7 @@ MonoBehaviour:
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
-    m_FontStyle: 0
+    m_FontStyle: 3
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
